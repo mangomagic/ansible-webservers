@@ -1,0 +1,51 @@
+#
+# Reverse Proxy for Temple of Thai
+#
+
+upstream templeofthai {
+    server 45.55.100.195:80;
+}
+
+upstream templeofthai-https {
+    server 45.55.100.195:443;
+}
+
+server {
+
+#    if ($host = www.templeofthai.com) {
+#        return 301 https://$host$request_uri;
+#    }
+
+# managed by Certbot
+
+    listen 80;
+    server_name templeofthai.com, www.templeofthai.com;
+
+    location / {
+        proxy_pass http://templeofthai;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    server_name templeofthai.com, www.templeofthai.com;
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.templeofthai.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/www.templeofthai.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    ssl_session_cache shared:SSL:1m;
+
+    location / {
+   	    proxy_pass https://templeofthai-https;
+	    proxy_set_header Host $host;
+	    proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+	    proxy_ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+	    proxy_read_timeout 90;
+    }
+}

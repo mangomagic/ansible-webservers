@@ -1,0 +1,40 @@
+---
+- hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Main Nginx configuration
+      template:
+        src: nginx/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify:
+        - reload nginx
+
+    # - name: Delete all conf.d files
+    #   file:
+    #     path: "/etc/nginx/conf.d/*"
+    #     state: absent
+
+    - name: Nginx configurations (conf.d)
+      template:
+        src: "{{ item }}"
+        dest: "/etc/nginx/conf.d/{{ item }}"
+        mode: 644
+      with_fileglob:
+        - 'templates/conf.d/*'
+      notify:
+        - reload nginx
+
+    - name: Allow Nginx through UFW
+      ufw:
+        rule: allow
+        name: Nginx Full
+
+  handlers:
+    - name: reload nginx
+      command: nginx -s reload

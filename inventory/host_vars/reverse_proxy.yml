@@ -1,0 +1,11 @@
+---
+
+www_files:
+  - mangomagic.co.uk
+placeholders:
+  - mangomagic.co.uk
+  - somethingthai.com
+sites_enabled:
+  - reverse-proxy
+  - mangomagic.co.uk
+  - somethingthai.com

@@ -1,0 +1,57 @@
+- hosts: webservers
+  become: yes
+
+  tasks:
+  #   - name: Delete all files in sites-enabled
+  #     file:
+  #       path: "/etc/nginx/sites-enabled/*"
+  #       state: absent
+
+    - name: Nginx sites-available
+      template:
+        src: "{{ item }}"
+        dest: "/etc/nginx/sites-available/{{ item | basename }}"
+        mode: 644
+      with_fileglob:
+        - 'templates/nginx/sites-available/*'
+
+    - name: Create virtual host files for placeholder domains
+      template:
+        src: templates/nginx/virtual-host.conf.j2
+        dest: "/etc/nginx/sites-available/{{ item }}"
+        mode: '0644'
+      loop: "{{ placeholders }}"
+
+    - name: Create directory path
+      file:
+        path: "/var/www/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ placeholders + www_files.domain }}"
+
+    - name: Copy index.html to each domain directory
+      template:
+        src: templates/nginx/index.html.j2
+        dest: "/var/www/{{ item }}/index.html"
+        mode: '0644'
+        group: www-data
+      loop: "{{ placeholders }}"
+
+    - name: Create symlinks to enable sites
+      file:
+        src: "/etc/nginx/sites-available/{{ item }}"
+        dest: "/etc/nginx/sites-enabled/{{ item }}"
+        state: link
+      # when: item.enabled == true
+      loop: "{{ sites_enabled }}"
+
+    - name: Test Nginx configuration
+      command: nginx -t
+      register: nginx_config_test
+      failed_when: nginx_config_test.rc != 0
+      notify:
+        - reload nginx
+
+  handlers:
+    - name: reload nginx
+      command: nginx -s reload

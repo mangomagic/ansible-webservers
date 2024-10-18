@@ -1,0 +1,11 @@
+---
+
+www_files:
+  - domain: mangomagic.co.uk
+    repo: git@github.com:mangomagic/www.git
+    folder: maongomagic.co.uk
+placeholders:
+  - somethingthai.com
+sites_enabled:
+  - mangomagic.co.uk
+  - somethingthai.com
