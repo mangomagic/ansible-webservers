@@ -1,0 +1,17 @@
+---
+placeholders: []
+sites_enabled:
+  - name: default
+  - name: reverse-proxy
+  - name: mangomagic.co.uk
+  - name: somethingthai.com
+  - name: asian.kitchen
+  - name: burmesefood.org
+  - name: fruitcarving.info
+  - name: fruitcarving.net
+  - name: fruitcarving.org
+  - name: glennaberry.com
+  - name: tantric.guru
+  - name: thaifood.recipes
+  - name: vietnamese-food.com
+  - name: vietnamese-grocery.com

@@ -1,1 +1,41 @@
 ---
+
+www_data:
+  - name: mangomagic.co.uk
+    ssl: true
+    repo_url: "git@github.com:"
+    repo_user: mangomagic
+    repo_name: www
+    www_folder: mangomagic.co.uk
+  - name: burmesefood.org
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/burmesefood.org"
+  - name: asian.kitchen
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/asian.kitchen"
+  - name: somethingthai.com
+    local_path: "{{ playbook_dir }}/../../www/somethingthai.com"
+  - name: fruitcarving.info
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/fruitcarving.info"
+  - name: fruitcarving.net
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/fruitcarving.net"
+  - name: fruitcarving.org
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/fruitcarving.org"
+  - name: glennaberry.com
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/glennaberry.com"
+  - name: tantric.guru
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/tantric.guru"
+  - name: thaifood.recipes
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/thaifood.recipes"
+  - name: vietnamese-food.com
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/vietnamese-food.com"
+  - name: vietnamese-grocery.com
+    https_redirect: true
+    local_path: "{{ playbook_dir }}/../../www/vietnamese-grocery.com"

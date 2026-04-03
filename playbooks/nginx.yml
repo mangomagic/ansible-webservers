@@ -5,7 +5,9 @@
   tasks:
     - name: Install Nginx
       package:
-        name: nginx
+        name:
+          - nginx
+          - ssl-cert
         state: present
 
     - name: Main Nginx configuration
@@ -26,14 +28,30 @@
         dest: "/etc/nginx/conf.d/{{ item }}"
         mode: 644
       with_fileglob:
-        - 'templates/conf.d/*'
+        - 'templates/nginx/conf.d/*'
       notify:
         - reload nginx
+
+    - name: Install UFW
+      apt:
+        name: ufw
+        state: present
+        update_cache: yes
+
+    - name: Allow SSH through UFW
+      ufw:
+        rule: allow
+        name: OpenSSH
 
     - name: Allow Nginx through UFW
       ufw:
         rule: allow
         name: Nginx Full
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+      when: "'production' in group_names"
 
   handlers:
     - name: reload nginx

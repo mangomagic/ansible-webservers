@@ -18,29 +18,47 @@
     - name: Create virtual host files for placeholder domains
       template:
         src: templates/nginx/virtual-host.conf.j2
-        dest: "/etc/nginx/sites-available/{{ item }}"
+        dest: "/etc/nginx/sites-available/{{ item.name }}"
         mode: '0644'
-      loop: "{{ placeholders }}"
+      loop: "{{ placeholders + www_data }}"
 
     - name: Create directory path
       file:
-        path: "/var/www/{{ item }}"
+        path: "/var/www/{{ item.name }}"
         state: directory
         mode: '0755'
-      loop: "{{ placeholders + www_files.domain }}"
+      loop: "{{ placeholders + www_data }}"
+
+    - name: Clone www repositories
+      git:
+        repo: "{{ item.repo_url }}{{ item.repo_user }}/{{ item.repo_name }}.git"
+        dest: "{{ clone_dir }}/{{ item.repo_name }}"
+        clone: yes
+        update: yes
+      loop: "{{ www_data }}"
+      when: item.repo_url is defined
+      delegate_to: localhost
+      become: no
+
+    - name: Copy www data to webserver
+      copy:
+        src: "{{ item.local_path if item.local_path is defined else clone_dir + '/' + item.repo_name + '/' + item.www_folder }}/"
+        dest: "/var/www/{{ item.name }}"
+        remote_src: no
+      loop: "{{ www_data }}"
 
     - name: Copy index.html to each domain directory
       template:
         src: templates/nginx/index.html.j2
-        dest: "/var/www/{{ item }}/index.html"
+        dest: "/var/www/{{ item.name }}/index.html"
         mode: '0644'
         group: www-data
       loop: "{{ placeholders }}"
 
     - name: Create symlinks to enable sites
       file:
-        src: "/etc/nginx/sites-available/{{ item }}"
-        dest: "/etc/nginx/sites-enabled/{{ item }}"
+        src: "/etc/nginx/sites-available/{{ item.name }}"
+        dest: "/etc/nginx/sites-enabled/{{ item.name }}"
         state: link
       # when: item.enabled == true
       loop: "{{ sites_enabled }}"

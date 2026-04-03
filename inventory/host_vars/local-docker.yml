@@ -1,0 +1,8 @@
+---
+
+placeholders:
+  - name: somethingthai.com
+  - name: burmesefood.org
+sites_enabled:
+  - name: mangomagic.co.uk
+  - name: somethingthai.com
