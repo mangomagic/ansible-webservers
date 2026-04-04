@@ -21,6 +21,13 @@ server {
 	location / {
 		try_files $uri $uri/ =404;
 	}
+
+{% if item.php | default(false) %}
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/var/run/php/php{{ php_version }}-fpm.sock;
+	}
+{% endif %}
 {% endif %}
 }
 
@@ -43,5 +50,12 @@ server {
 	location / {
 		try_files $uri $uri/ =404;
 	}
+
+{% if item.php | default(false) %}
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/var/run/php/php{{ php_version }}-fpm.sock;
+	}
+{% endif %}
 }
 {% endif %}

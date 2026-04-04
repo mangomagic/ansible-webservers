@@ -1,0 +1,83 @@
+---
+- hosts: webservers
+  become: yes
+
+  vars_files:
+    - "{{ inventory_dir }}/group_vars/vault.yml"
+
+  tasks:
+    - name: Install MySQL and Python bindings
+      apt:
+        name:
+          - mysql-server
+          - python3-pymysql
+        state: present
+        update_cache: yes
+
+    - name: Start and enable MySQL
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Set MySQL root password
+      community.mysql.mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      no_log: true
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Remove anonymous users
+      community.mysql.mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Remove test database
+      community.mysql.mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Disallow remote root login
+      community.mysql.mysql_user:
+        name: root
+        host: "{{ item }}"
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+      loop:
+        - "{{ ansible_hostname }}"
+        - "127.0.0.1"
+        - "::1"
+      ignore_errors: yes
+
+    - name: Create application databases
+      community.mysql.mysql_db:
+        name: "{{ item.db }}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+      loop: "{{ mysql_databases }}"
+      no_log: true
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Create database users
+      community.mysql.mysql_user:
+        name: "{{ item.user }}"
+        password: "{{ item.password }}"
+        priv: "{{ item.db }}.*:ALL"
+        host: localhost
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+      loop: "{{ mysql_databases }}"
+      no_log: true
+      ignore_errors: "{{ ansible_check_mode }}"

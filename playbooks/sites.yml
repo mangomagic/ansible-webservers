@@ -13,21 +13,23 @@
         dest: "/etc/nginx/sites-available/{{ item | basename }}"
         mode: 644
       with_fileglob:
-        - 'templates/nginx/sites-available/*'
+        - "templates/nginx/sites-available/*"
 
     - name: Create virtual host files for placeholder domains
       template:
         src: templates/nginx/virtual-host.conf.j2
         dest: "/etc/nginx/sites-available/{{ item.name }}"
-        mode: '0644'
+        mode: "0644"
       loop: "{{ placeholders + www_data }}"
+      when: site is not defined or site == item.name
 
     - name: Create directory path
       file:
         path: "/var/www/{{ item.name }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
       loop: "{{ placeholders + www_data }}"
+      when: site is not defined or site == item.name
 
     - name: Clone www repositories
       git:
@@ -36,31 +38,48 @@
         clone: yes
         update: yes
       loop: "{{ www_data }}"
-      when: item.repo_url is defined
+      when: (site is not defined or site == item.name) and item.repo_url is defined
       delegate_to: localhost
       become: no
 
     - name: Copy www data to webserver
-      copy:
+      synchronize:
         src: "{{ item.local_path if item.local_path is defined else clone_dir + '/' + item.repo_name + '/' + item.www_folder }}/"
         dest: "/var/www/{{ item.name }}"
-        remote_src: no
+        delete: yes
       loop: "{{ www_data }}"
+      when: site is not defined or site == item.name
+
+    - name: Set www directory ownership
+      file:
+        path: "/var/www/{{ item.name }}"
+        owner: root
+        group: www-data
+        recurse: yes
+      loop: "{{ www_data }}"
+      when: site is not defined or site == item.name
+
+    - name: Set www directory permissions
+      shell: |
+        find /var/www/{{ item.name }} -type d -exec chmod 755 {} \;
+        find /var/www/{{ item.name }} -type f -exec chmod 644 {} \;
+      loop: "{{ www_data }}"
+      when: site is not defined or site == item.name
 
     - name: Copy index.html to each domain directory
       template:
         src: templates/nginx/index.html.j2
         dest: "/var/www/{{ item.name }}/index.html"
-        mode: '0644'
+        mode: "0644"
         group: www-data
       loop: "{{ placeholders }}"
+      when: site is not defined or site == item.name
 
     - name: Create symlinks to enable sites
       file:
         src: "/etc/nginx/sites-available/{{ item.name }}"
         dest: "/etc/nginx/sites-enabled/{{ item.name }}"
         state: link
-      # when: item.enabled == true
       loop: "{{ sites_enabled }}"
 
     - name: Test Nginx configuration

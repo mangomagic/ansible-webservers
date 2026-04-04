@@ -39,3 +39,17 @@ www_data:
   - name: vietnamese-grocery.com
     https_redirect: true
     local_path: "{{ playbook_dir }}/../../www/vietnamese-grocery.com"
+  # Temporary staging subdomain for somethingthai.com migration
+  - name: sti.mangomagic.co.uk
+    php: true
+    local_path: "{{ playbook_dir }}/../../www/somethingthai.com"
+
+php_version: "7.4"
+
+mysql_root_password: "{{ vault_mysql_root_password }}"
+
+mysql_databases:
+  - db: lwt
+    user: lwt
+    password: "{{ vault_mysql_lwt_password }}"
+

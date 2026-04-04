@@ -15,6 +15,8 @@ Ansible playbooks for configuring nginx on a Digital Ocean server (`nginx-proxy-
 |---|---|
 | `playbooks/nginx.yml` | Install and configure nginx |
 | `playbooks/sites.yml` | Deploy virtual hosts and site content |
+| `playbooks/php.yml` | Install PHP-FPM and extensions |
+| `playbooks/mysql.yml` | Install and configure MySQL, create databases and users |
 
 ## Local Development Setup
 
@@ -64,7 +66,7 @@ ansible-playbook -l dev playbooks/nginx.yml
 ansible-playbook -vv -l dev playbooks/sites.yml
 ```
 
-Check nginx is up: http://localhost:8080
+Check nginx is up: <http://localhost:8080>
 
 ## Usage
 
@@ -87,6 +89,76 @@ ansible-playbook -vv -l dev playbooks/sites.yml
 # Production — dry run first
 ansible-playbook -vv -l production playbooks/sites.yml --check
 ansible-playbook -vv -l production playbooks/sites.yml
+
+# Deploy a single site
+ansible-playbook -vv -l production playbooks/sites.yml -e site=somethingthai.com
+```
+
+Sites that use vault credentials (e.g. LWT database config) require `--ask-vault-pass`:
+
+```bash
+ansible-playbook -vv -l production playbooks/sites.yml -e site=sti.mangomagic.co.uk --ask-vault-pass
+```
+
+### PHP
+
+Ubuntu 20.04 ships PHP 7.4. The version is set via `php_version` in `inventory/group_vars/webservers.yml`.
+
+```bash
+# Dev
+ansible-playbook -l dev playbooks/php.yml
+
+# Production
+ansible-playbook -l production playbooks/php.yml
+```
+
+To enable PHP for a site, add `php: true` to its entry in `inventory/group_vars/webservers.yml`:
+
+```yaml
+www_data:
+  - name: mysite.com
+    php: true
+    local_path: "..."
+```
+
+Then redeploy the site to update the virtual host config:
+
+```bash
+ansible-playbook -vv -l production playbooks/sites.yml -e site=mysite.com
+```
+
+### MySQL
+
+Set passwords in `inventory/group_vars/vault.yml` then encrypt it:
+
+```bash
+ansible-vault encrypt inventory/group_vars/vault.yml
+```
+
+```bash
+# Dev
+ansible-playbook -l dev playbooks/mysql.yml --ask-vault-pass
+
+# Production — dry run first
+ansible-playbook -l production playbooks/mysql.yml --ask-vault-pass --check
+ansible-playbook -l production playbooks/mysql.yml --ask-vault-pass
+```
+
+Add databases to `inventory/group_vars/webservers.yml`:
+
+```yaml
+mysql_databases:
+  - db: myapp
+    user: myapp
+    password: "{{ vault_mysql_myapp_password }}"
+```
+
+Then add the corresponding `vault_mysql_myapp_password` to `vault.yml` before re-encrypting.
+
+**Note**: make sure the `community.mysql` collection is installed:
+
+```bash
+ansible-galaxy collection install community.mysql
 ```
 
 ### Useful flags

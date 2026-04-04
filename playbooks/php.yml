@@ -1,0 +1,21 @@
+---
+- hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Install PHP-FPM and extensions
+      apt:
+        name:
+          - php-fpm
+          - php-mysql
+          - php-mbstring
+          - php-xml
+          - php-curl
+        state: present
+        update_cache: yes
+
+    - name: Start and enable PHP-FPM
+      service:
+        name: "php{{ php_version }}-fpm"
+        state: started
+        enabled: yes
