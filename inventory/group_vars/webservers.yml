@@ -3,10 +3,7 @@
 www_data:
   - name: mangomagic.co.uk
     ssl: true
-    repo_url: "git@github.com:"
-    repo_user: mangomagic
-    repo_name: www
-    www_folder: mangomagic.co.uk
+    local_path: "{{ playbook_dir }}/../../www/mangomagic.co.uk"
   - name: burmesefood.org
     https_redirect: true
     local_path: "{{ playbook_dir }}/../../www/burmesefood.org"
@@ -14,6 +11,8 @@ www_data:
     https_redirect: true
     local_path: "{{ playbook_dir }}/../../www/asian.kitchen"
   - name: somethingthai.com
+    ssl: true
+    php: true
     local_path: "{{ playbook_dir }}/../../www/somethingthai.com"
   - name: fruitcarving.info
     https_redirect: true
@@ -39,10 +38,26 @@ www_data:
   - name: vietnamese-grocery.com
     https_redirect: true
     local_path: "{{ playbook_dir }}/../../www/vietnamese-grocery.com"
-  # Temporary staging subdomain for somethingthai.com migration
-  - name: sti.mangomagic.co.uk
-    php: true
-    local_path: "{{ playbook_dir }}/../../www/somethingthai.com"
+  - name: ingredients.asia
+    ssl: true
+    local_path: "{{ playbook_dir }}/../../www/ingredients.asia"
+  - name: kohphangan.rent
+    ssl: true
+    local_path: "{{ playbook_dir }}/../../www/kohphangan.rent"
+  - name: sothai.co
+    ssl: true
+    local_path: "{{ playbook_dir }}/../../www/sothai.co"
+
+  - name: thaifood.in
+    local_path: "{{ playbook_dir }}/../../www/thaifood.in"
+  - name: fruitcarving.in
+    local_path: "{{ playbook_dir }}/../../www/fruitcarving.in"
+  - name: thaifoodandrecipes.com
+    local_path: "{{ playbook_dir }}/../../www/thaifoodandrecipes.com"
+  - name: thai-grocery.com
+    local_path: "{{ playbook_dir }}/../../www/thai-grocery.com"
+  - name: sothai.asia
+    local_path: "{{ playbook_dir }}/../../www/sothai.asia"
 
 php_version: "7.4"
 

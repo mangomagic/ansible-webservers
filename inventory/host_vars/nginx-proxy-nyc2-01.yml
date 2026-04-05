@@ -15,4 +15,12 @@ sites_enabled:
   - name: thaifood.recipes
   - name: vietnamese-food.com
   - name: vietnamese-grocery.com
-  - name: sti.mangomagic.co.uk
+  - name: ingredients.asia
+  - name: kohphangan.rent
+  - name: sothai.co
+
+  - name: thaifood.in
+  - name: fruitcarving.in
+  - name: thaifoodandrecipes.com
+  - name: thai-grocery.com
+  - name: sothai.asia
